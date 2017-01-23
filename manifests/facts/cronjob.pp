@@ -2,36 +2,32 @@
 #
 # This module installs a cron script that puts Puppet facts in a file for MCollective to use
 #
-# === Example
-#
-# Hiera: 
-#   mcollective::facts::cronjob::run_every: 15   # every quarter hour 
-#
-class mcollective::facts::cronjob(
-  $run_every = 'unknown',
-)
-inherits mcollective {
+class mcollective::facts::cronjob (
+  $enable = true,
+) inherits mcollective {
 
-  # if they passed in Hiera value use that.
-  $enable = $run_every ? {
-    'unknown' => 'absent',
-    undef     => 'absent',
-    ''        => 'absent',
-    default   => 'present',
+  $ensure = $enable ? {
+    true  => 'present',
+    false => 'absent',
   }
 
-  # Define the minute to be all if runevery wasn't defined
-  $minute = $enable ? {
-    'absent'  => '*',
-    'present' => "*/${run_every}",
+  $mco_etc  = $mcollective::etcdir
+  $ruby_bin = "${mcollective::bindir}/ruby"
+
+  file { '/opt/puppetlabs/puppet/bin/refresh-mcollective-metadata':
+    ensure  => 'file',
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0755',
+    content => template("${module_name}/refresh-mcollective-metadata.erb"),
   }
-  
-  # shorten for ease of use
-  $yamlfile = "${mcollective::etcdir}/facts.yaml"
+
+  $rnd_minute = fqdn_rand(15) # assure spread of the fact collection
 
   cron { 'mcollective-facts':
-    ensure  => $enable,
-    command => "facter --puppet --yaml > ${yamlfile}.new && ! diff -q ${yamlfile}.new ${yamlfile} > /dev/null && mv -f ${yamlfile}.new ${yamlfile}",
-    minute  => $minute,
+    ensure  => $ensure,
+    command => '/opt/puppetlabs/puppet/bin/refresh-mcollective-metadata',
+    minute  => "${rnd_minute}-59/15",
+    require => File['/opt/puppetlabs/puppet/bin/refresh-mcollective-metadata'],
   }
 }

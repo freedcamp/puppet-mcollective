@@ -14,6 +14,11 @@ class mcollective::params {
     }
   }
 
+  $bindir = $::clientversion ? {
+    /(?:4\.)/  => '/opt/puppetlabs/puppet/bin',
+    default    => '/opt/puppet/bin',
+  }
+
   $logrotate_directory = $::osfamily ? {
     /(?i-mx:freebsd)/ => '/usr/local/etc/logrotate.d',
     default           => '/etc/logrotate.d',

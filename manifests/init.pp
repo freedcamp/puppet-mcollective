@@ -76,6 +76,7 @@ class mcollective(
   # Puppet v3 will look for values in Hiera before falling back to defaults defined in params class
   # These values tend to be common based on operating system
   $etcdir               =  $mcollective::params::etcdir,
+  $bindir               =  $mcollective::params::bindir,
   $libdir               =  $mcollective::params::libdir,
   $logfile              =  $mcollective::params::logfile,
   $stomp_package        =  $mcollective::params::stomp_package,
