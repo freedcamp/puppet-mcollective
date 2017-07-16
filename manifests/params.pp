@@ -5,7 +5,7 @@
 class mcollective::params {
   # Default locations for certain os combinations
   $etcdir = $::clientversion ? {
-    /(?:4\.)/  => '/etc/puppetlabs/mcollective',
+    /^(?:4|5)\./  => '/etc/puppetlabs/mcollective',
     default    => $::osfamily ? {
       /(?i-mx:redhat)/  => '/etc/mcollective',
       /(?i-mx:debian)/  => '/etc/mcollective',
@@ -15,7 +15,7 @@ class mcollective::params {
   }
 
   $bindir = $::clientversion ? {
-    /(?:4\.)/  => '/opt/puppetlabs/puppet/bin',
+    /^(?:4|5)\./  => '/opt/puppetlabs/puppet/bin',
     default    => '/opt/puppet/bin',
   }
 
